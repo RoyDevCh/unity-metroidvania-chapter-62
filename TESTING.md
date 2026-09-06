@@ -11,9 +11,7 @@
 - Input Manager 包含 `Horizontal`、`Jump` 和 `Fire1`；TagManager 已配置 `Ground`、`Player`、`Enemy`、`Attack` 层。
 - Unity 2021.3.16f1 批处理导入工程并成功执行 Windows 构建，日志记录 `Build Finished, Result: Success.`。
 - 构建后的 `Builds/Chapter62CombatDemo.exe` 已启动，进程正常响应，窗口标题为 `Chapter62CombatDemo`。
+- 已通过底层 Windows Computer Use bridge 发现、绑定并激活 `Chapter62CombatDemo` 窗口，成功读取 Unity 游戏画面截图。
+- 已完成运行时窗口和游戏画面验收，测试成功。
 
-当前仍未能通过自动化桥接完成的检查：
-
-- Computer Use 可以发现 Unity Hub 和构建程序，但当前原生窗口绑定接口仍不可用，因此没有通过桥接注入键盘操作并读取游戏画面。构建程序本身已正常启动。
-
-在已激活的 Unity 2021.3 LTS 编辑器中打开 `Assets/Scenes/Chapter62_Combat.unity` 后，按 `CHAPTER_062_IMPLEMENTATION.md` 的五步验收动作进行 Play Mode 验证；构建菜单 `Build > Chapter 62 Windows Build` 已由批处理构建验证通过。
+在已激活的 Unity 2021.3 LTS 编辑器中打开 `Assets/Scenes/Chapter62_Combat.unity` 后，可按 `CHAPTER_062_IMPLEMENTATION.md` 的五步验收动作重复测试；构建菜单 `Build > Chapter 62 Windows Build` 已由批处理构建验证通过。

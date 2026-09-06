@@ -9,13 +9,18 @@ public class CombatHud : MonoBehaviour
     private void Start()
     {
         player = FindObjectOfType<Player>();
-        title = new GUIStyle(GUI.skin.label) { fontSize = 22, fontStyle = FontStyle.Bold };
-        body = new GUIStyle(GUI.skin.label) { fontSize = 16 };
+    }
+
+    private void EnsureStyles()
+    {
+        if (title == null) title = new GUIStyle(GUI.skin.label) { fontSize = 22, fontStyle = FontStyle.Bold };
+        if (body == null) body = new GUIStyle(GUI.skin.label) { fontSize = 16 };
     }
 
     private void OnGUI()
     {
         if (player == null) return;
+        EnsureStyles();
         GUI.color = Color.white;
         GUI.Label(new Rect(18, 15, 500, 32), "第 62 章战斗试炼场", title);
         GUI.Label(new Rect(18, 52, 700, 28), "A/D 移动   Space 跳跃   Shift 冲刺   J 攻击   Q 进入弹反，再按 Q 触发招架", body);

@@ -9,9 +9,11 @@
 - 默认 Build Settings 指向 `Assets/Scenes/Chapter62_Combat.unity`。
 - `DemoBootstrap` 的场景脚本 GUID 与其 `.meta` 文件一致。
 - Input Manager 包含 `Horizontal`、`Jump` 和 `Fire1`；TagManager 已配置 `Ground`、`Player`、`Enemy`、`Attack` 层。
+- Unity 2021.3.16f1 批处理导入工程并成功执行 Windows 构建，日志记录 `Build Finished, Result: Success.`。
+- 构建后的 `Builds/Chapter62CombatDemo.exe` 已启动，进程正常响应，窗口标题为 `Chapter62CombatDemo`。
 
-未能在本机完成的检查：
+当前仍未能通过自动化桥接完成的检查：
 
-- Unity batchmode 在导入脚本前报告没有有效编辑器许可证，因此无法自动执行 Play Mode 或 Windows Build。日志为 `BatchMode: Unity has not been activated with a valid License`。
+- Computer Use 可以发现 Unity Hub 和构建程序，但当前原生窗口绑定接口仍不可用，因此没有通过桥接注入键盘操作并读取游戏画面。构建程序本身已正常启动。
 
-在已激活的 Unity 2021.3 LTS 编辑器中打开 `Assets/Scenes/Chapter62_Combat.unity` 后，按 `CHAPTER_062_IMPLEMENTATION.md` 的五步验收动作进行 Play Mode 验证，再运行 `Build > Chapter 62 Windows Build` 即可完成最终运行时和构建确认。
+在已激活的 Unity 2021.3 LTS 编辑器中打开 `Assets/Scenes/Chapter62_Combat.unity` 后，按 `CHAPTER_062_IMPLEMENTATION.md` 的五步验收动作进行 Play Mode 验证；构建菜单 `Build > Chapter 62 Windows Build` 已由批处理构建验证通过。

@@ -9,6 +9,7 @@ public class CombatHud : MonoBehaviour
     private void Start()
     {
         player = FindObjectOfType<Player>();
+        Debug.Log("Chapter62: HUD started, player=" + (player == null ? "null" : player.name));
     }
 
     private void EnsureStyles()

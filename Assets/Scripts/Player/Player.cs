@@ -26,7 +26,7 @@ public class Player : Entity
     public PlayerAttackState AttackState { get; private set; }
     public PlayerCounterAttackState CounterAttackState { get; private set; }
     public bool IsGrounded { get { return groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, 0.12f, groundLayer); } }
-    public bool IsTouchingWall { get { return wallCheck != null && Physics2D.OverlapCircle(wallCheck.position, 0.12f, groundLayer); } }
+    public bool IsTouchingWall { get { return wallCheck != null && Physics2D.OverlapCircle(wallCheck.position, 0.28f, groundLayer); } }
     public float JumpForce { get { return jumpForce; } }
     public float DashSpeed { get { return dashSpeed; } }
     public float DashDuration { get { return dashDuration; } }

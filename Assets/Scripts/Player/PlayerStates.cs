@@ -138,16 +138,28 @@ public class PlayerCounterAttackState : PlayerState
 {
     private bool checkedHit;
     public PlayerCounterAttackState(Player p, PlayerStateMachine sm) : base(p, sm) { }
-    public override void Enter() { base.Enter(); checkedHit = false; player.SetZeroVelocity(); }
+    public override void Enter()
+    {
+        base.Enter();
+        checkedHit = false;
+        player.BeginCounterWindow();
+        player.SetZeroVelocity();
+    }
     public override void Update()
     {
         base.Update();
         player.SetZeroVelocity();
         if (!checkedHit && Input.GetKeyDown(KeyCode.Q)) { checkedHit = true; player.TryCounter(); }
-        if (stateTimer >= 0.72f)
+        if (stateTimer >= 2f)
         {
             if (player.IsGrounded) stateMachine.ChangeState(player.IdleState);
             else stateMachine.ChangeState(player.AirState);
         }
+    }
+
+    public override void Exit()
+    {
+        player.EndCounterWindow();
+        base.Exit();
     }
 }

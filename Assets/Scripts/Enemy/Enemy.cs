@@ -40,7 +40,7 @@ public class Enemy : Entity
             StateLabel = attacking ? "Attack" : "Battle";
             SetZeroVelocity();
             Face(player.transform.position.x >= transform.position.x ? 1 : -1);
-            if (attackTimer <= 0f) { attacking = true; attackTimer = 1.1f; Invoke(nameof(DealAttack), 0.28f); }
+            if (attackTimer <= 0f) { attacking = true; attackTimer = 1.1f; Invoke(nameof(DealAttack), 0.45f); }
         }
         else if (distance <= detectionRange && player != null)
         {
@@ -67,6 +67,14 @@ public class Enemy : Entity
         player.Damage(attackDamage, new Vector2(facingDirection * 5f, 3f));
     }
 
-    public bool CanBeStunned() { return !dead && stunTimer <= 0f && attacking; }
+    public bool CanBeStunned()
+    {
+        if (dead || stunTimer > 0f || player == null) return false;
+        float distance = Vector2.Distance(transform.position, player.transform.position);
+        bool attackIsActive = attacking;
+        bool attackIsAboutToStart = !attacking && attackTimer <= 0.05f && distance <= attackRange + 1f;
+        bool counterWindowTarget = player.CounterWindow && distance <= attackRange + 1f;
+        return attackIsActive || attackIsAboutToStart || counterWindowTarget;
+    }
     public void Stun(float duration) { stunTimer = Mathf.Max(stunTimer, duration); attacking = false; CancelInvoke(nameof(DealAttack)); SetZeroVelocity(); }
 }

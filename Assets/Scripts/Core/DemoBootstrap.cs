@@ -16,6 +16,8 @@ public class DemoBootstrap : MonoBehaviour
         CreatePlatform(new Vector2(0f, -3f), new Vector2(26f, 1f), new Color(0.18f, 0.22f, 0.34f));
         CreatePlatform(new Vector2(-5f, 0f), new Vector2(4f, 0.55f), new Color(0.26f, 0.3f, 0.45f));
         CreatePlatform(new Vector2(4f, 1.1f), new Vector2(4f, 0.55f), new Color(0.26f, 0.3f, 0.45f));
+        // 靠近出生点的练习墙，方便直接验证滑墙和蹬墙跳。
+        CreatePlatform(new Vector2(-9.0f, 0.5f), new Vector2(0.6f, 7f), new Color(0.2f, 0.25f, 0.38f));
         CreatePlatform(new Vector2(-12.5f, 1f), new Vector2(0.7f, 8f), new Color(0.2f, 0.25f, 0.38f));
         CreatePlatform(new Vector2(12.5f, 1f), new Vector2(0.7f, 8f), new Color(0.2f, 0.25f, 0.38f));
         if (FindObjectOfType<CombatHud>() == null) new GameObject("Combat HUD").AddComponent<CombatHud>();
@@ -38,8 +40,9 @@ public class DemoBootstrap : MonoBehaviour
 
     private void CreatePlayer(Vector2 position)
     {
+        // The supplied pixel sheets are exported at 4x (192x128 per logical 48x32 frame).
         GameObject go = CreateActor("Player", position, Color.white, 0.9f, 1.5f,
-            RuntimeSprite.PixelActor("Chapter62Art/character_player_sheet_48x32x6x6", 48, 32, 0, 32f));
+            RuntimeSprite.PixelActor("Chapter62Art/character_player_sheet_48x32x6x6", 192, 128, 0, 128f));
         go.layer = 9;
         Player player = go.AddComponent<Player>();
         Transform ground = new GameObject("GroundCheck").transform; ground.SetParent(go.transform); ground.localPosition = new Vector3(0f, -0.78f, 0f);
@@ -51,7 +54,7 @@ public class DemoBootstrap : MonoBehaviour
     private void CreateEnemy(Vector2 position, string spritePath)
     {
         GameObject go = CreateActor("Enemy", position, Color.white, 0.95f, 1.3f,
-            RuntimeSprite.PixelActor(spritePath, 40, 32, 0, 32f));
+            RuntimeSprite.PixelActor(spritePath, 160, 128, 0, 128f));
         go.layer = 10;
         go.AddComponent<Enemy>();
     }

@@ -19,3 +19,6 @@
 *.suo
 *StaticCheck.dll
 unity-import.log
+*.log
+test-evidence/
+tools/__pycache__/

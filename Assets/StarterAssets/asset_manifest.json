@@ -1,0 +1,58 @@
+{
+  "name": "Unity Metroidvania Starter Original Assets",
+  "generated": "2026-06-21",
+  "license": "Original generated placeholder assets for this local learning project. Replace before commercial release if desired.",
+  "art": [
+    "art_style_board.png",
+    "background_layer_1_sky.png",
+    "background_layer_2_ruins.png",
+    "background_layer_3_foreground.png",
+    "character_player_sheet_48x32x6x6.png",
+    "enemy_archer_sheet_40x32.png",
+    "enemy_boss_deathbringer_sheet_64x56.png",
+    "enemy_skeleton_sheet_40x32.png",
+    "enemy_slime_sheet_40x32.png",
+    "fx_skill_effects_sheet_32x32.png",
+    "tileset_dark_dungeon_16x16.png",
+    "ui_hud_atlas.png",
+    "ui_skill_item_icons_32x32.png"
+  ],
+  "audio": [
+    "ambience_dungeon_loop.wav",
+    "checkpoint.wav",
+    "enemy_die.wav",
+    "enemy_hurt.wav",
+    "hit_heavy.wav",
+    "hit_light.wav",
+    "pickup_coin.wav",
+    "pickup_item.wav",
+    "player_dash.wav",
+    "player_jump.wav",
+    "save_game.wav",
+    "skill_blackhole_start.wav",
+    "skill_clone.wav",
+    "skill_crystal_explode.wav",
+    "skill_crystal_place.wav",
+    "skill_thunder.wav",
+    "sword_swing_1.wav",
+    "sword_swing_2.wav",
+    "sword_swing_3.wav",
+    "sword_throw.wav",
+    "ui_back.wav",
+    "ui_click.wav"
+  ],
+  "unity_import": {
+    "sprites": {
+      "Texture Type": "Sprite (2D and UI)",
+      "Sprite Mode": "Multiple for sheets, Single for backgrounds",
+      "Pixels Per Unit": "16 for tiles/effects/icons, 32 or 48 for character sheets if preferred",
+      "Filter Mode": "Point (no filter)",
+      "Compression": "None"
+    },
+    "audio": {
+      "Load Type": "Decompress On Load for short SFX, Streaming for ambience_dungeon_loop.wav",
+      "Compression Format": "PCM or ADPCM",
+      "Force To Mono": true
+    }
+  }
+}

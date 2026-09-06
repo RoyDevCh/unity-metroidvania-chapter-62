@@ -1,0 +1,21 @@
+# Unity generated directories
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# IDE and generated files
+.vs/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.booproj
+*.suo
+*StaticCheck.dll
+unity-import.log

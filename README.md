@@ -8,7 +8,9 @@
 2. 打开 `Assets/Scenes/Chapter62_Combat.unity`。
 3. 点击 Play。
 
-场景会在运行时生成训练场、玩家和两个敌人，因此不依赖手工制作 Prefab 或 Animator 就能开始学习代码。
+场景会在运行时生成训练场、玩家和两个敌人，并加载 `Assets/Resources/Chapter62Art` 中的像素角色与背景素材，因此不依赖手工制作 Prefab 或 Animator 就能开始学习代码。
+
+当前演示使用的是单帧像素素材，重点仍然是前 62 章的移动、状态机和战斗逻辑；动画剪辑、Tilemap 关卡和正式 UI 可以在此基础上继续制作。
 
 ## 操作
 

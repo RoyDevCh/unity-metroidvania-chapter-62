@@ -13,5 +13,7 @@
 - 构建后的 `Builds/Chapter62CombatDemo.exe` 已启动，进程正常响应，窗口标题为 `Chapter62CombatDemo`。
 - 已通过底层 Windows Computer Use bridge 发现、绑定并激活 `Chapter62CombatDemo` 窗口，成功读取 Unity 游戏画面截图。
 - 已完成运行时窗口和游戏画面验收，测试成功。
+- 已修复演示场景使用纯色方块的问题：玩家、骷髅、史莱姆和三层背景现在从 `Assets/Resources/Chapter62Art` 加载像素素材。
+- 已重新执行 Unity Windows 构建；像素素材导入器和运行时素材加载编译通过，日志记录 `Build Finished, Result: Success.`。
 
-在已激活的 Unity 2021.3 LTS 编辑器中打开 `Assets/Scenes/Chapter62_Combat.unity` 后，可按 `CHAPTER_062_IMPLEMENTATION.md` 的五步验收动作重复测试；构建菜单 `Build > Chapter 62 Windows Build` 已由批处理构建验证通过。
+在已激活的 Unity 2021.3 LTS 编辑器中打开 `Assets/Scenes/Chapter62_Combat.unity` 后，可按 `CHAPTER_062_IMPLEMENTATION.md` 的五步验收动作重复测试；构建菜单 `Build > Chapter 62 Windows Build` 已由批处理构建验证通过。当前角色使用单帧像素素材，动画剪辑、Tilemap 关卡和正式菜单仍未纳入第 62 章终点。

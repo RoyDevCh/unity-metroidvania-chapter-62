@@ -7,9 +7,12 @@ public class DemoBootstrap : MonoBehaviour
         Physics2D.IgnoreLayerCollision(9, 10, true);
         Camera camera = FindObjectOfType<Camera>();
         if (camera != null) camera.backgroundColor = new Color(0.035f, 0.045f, 0.09f);
+        CreateBackground("Chapter62Art/background_layer_1_sky", 8, 0.98f);
+        CreateBackground("Chapter62Art/background_layer_2_ruins", 7, 0.98f);
+        CreateBackground("Chapter62Art/background_layer_3_foreground", 6, 0.98f);
         CreatePlayer(new Vector2(-8f, -1.4f));
-        CreateEnemy(new Vector2(1.5f, -1.4f));
-        CreateEnemy(new Vector2(8f, -1.4f));
+        CreateEnemy(new Vector2(1.5f, -1.4f), "Chapter62Art/enemy_skeleton_sheet_40x32");
+        CreateEnemy(new Vector2(8f, -1.4f), "Chapter62Art/enemy_slime_sheet_40x32");
         CreatePlatform(new Vector2(0f, -3f), new Vector2(26f, 1f), new Color(0.18f, 0.22f, 0.34f));
         CreatePlatform(new Vector2(-5f, 0f), new Vector2(4f, 0.55f), new Color(0.26f, 0.3f, 0.45f));
         CreatePlatform(new Vector2(4f, 1.1f), new Vector2(4f, 0.55f), new Color(0.26f, 0.3f, 0.45f));
@@ -18,12 +21,12 @@ public class DemoBootstrap : MonoBehaviour
         if (FindObjectOfType<CombatHud>() == null) new GameObject("Combat HUD").AddComponent<CombatHud>();
     }
 
-    private GameObject CreateActor(string name, Vector2 position, Color color, float width, float height)
+    private GameObject CreateActor(string name, Vector2 position, Color color, float width, float height, Sprite sprite = null)
     {
         GameObject go = new GameObject(name);
         go.transform.position = position;
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = RuntimeSprite.Square;
+        sr.sprite = sprite == null ? RuntimeSprite.Square : sprite;
         sr.color = color;
         go.transform.localScale = new Vector3(width, height, 1f);
         Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
@@ -35,7 +38,8 @@ public class DemoBootstrap : MonoBehaviour
 
     private void CreatePlayer(Vector2 position)
     {
-        GameObject go = CreateActor("Player", position, new Color(0.3f, 0.85f, 1f), 0.9f, 1.5f);
+        GameObject go = CreateActor("Player", position, Color.white, 0.9f, 1.5f,
+            RuntimeSprite.PixelActor("Chapter62Art/character_player_sheet_48x32x6x6", 48, 32, 0, 32f));
         go.layer = 9;
         Player player = go.AddComponent<Player>();
         Transform ground = new GameObject("GroundCheck").transform; ground.SetParent(go.transform); ground.localPosition = new Vector3(0f, -0.78f, 0f);
@@ -44,9 +48,10 @@ public class DemoBootstrap : MonoBehaviour
         player.ConfigureRuntimeReferences(ground, wall, attack);
     }
 
-    private void CreateEnemy(Vector2 position)
+    private void CreateEnemy(Vector2 position, string spritePath)
     {
-        GameObject go = CreateActor("Enemy", position, new Color(1f, 0.35f, 0.45f), 0.95f, 1.3f);
+        GameObject go = CreateActor("Enemy", position, Color.white, 0.95f, 1.3f,
+            RuntimeSprite.PixelActor(spritePath, 40, 32, 0, 32f));
         go.layer = 10;
         go.AddComponent<Enemy>();
     }
@@ -56,5 +61,15 @@ public class DemoBootstrap : MonoBehaviour
         GameObject go = CreateActor("Ground", position, color, size.x, size.y);
         go.layer = 8;
         go.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+    }
+
+    private void CreateBackground(string spritePath, int sortingOrder, float scale)
+    {
+        GameObject go = new GameObject("Background_" + sortingOrder);
+        go.transform.position = new Vector3(0f, 1.5f, 5f + (8 - sortingOrder));
+        go.transform.localScale = Vector3.one * scale;
+        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+        renderer.sprite = RuntimeSprite.Background(spritePath);
+        renderer.sortingOrder = sortingOrder - 20;
     }
 }

@@ -9,6 +9,7 @@ public abstract class Entity : MonoBehaviour
 
     protected Rigidbody2D rb;
     protected SpriteRenderer spriteRenderer;
+    protected Color baseColor = Color.white;
     protected float health;
     protected float knockbackTimer;
     protected float flashTimer;
@@ -25,6 +26,7 @@ public abstract class Entity : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (spriteRenderer != null) baseColor = spriteRenderer.color;
         health = maxHealth;
     }
 
@@ -37,11 +39,11 @@ public abstract class Entity : MonoBehaviour
         {
             flashTimer -= Time.deltaTime;
             if (spriteRenderer != null)
-                spriteRenderer.color = Color.Lerp(Color.white, Color.red, flashTimer / 0.12f);
+                spriteRenderer.color = Color.Lerp(baseColor, Color.red, flashTimer / 0.12f);
         }
         else if (spriteRenderer != null && !dead)
         {
-            spriteRenderer.color = Color.white;
+            spriteRenderer.color = baseColor;
         }
     }
 

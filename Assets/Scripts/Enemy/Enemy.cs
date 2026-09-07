@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Enemy : Entity
 {
@@ -11,26 +12,43 @@ public class Enemy : Entity
     private float stunTimer;
     private float attackTimer;
     private bool attacking;
-    private string visualPath;
-    private int visualFrameWidth;
-    private int visualFrameHeight;
-    private int visualFrameCount;
-    private float visualPpu;
+    private class VisualClip
+    {
+        public string path;
+        public int frameCount;
+        public int frameWidth;
+        public int frameHeight;
+        public float framesPerSecond;
+        public float pixelsPerUnit;
+    }
+
+    private readonly Dictionary<string, VisualClip> visualClips = new Dictionary<string, VisualClip>();
     private float visualTimer;
     private int visualFrame;
+    private string visualKey;
     private SpriteRenderer visualRenderer;
 
     public string StateLabel { get; private set; }
 
-    public void ConfigureVisuals(string path, int frameCount, int frameWidth, int frameHeight, float framesPerSecond, float ppu)
+    public void ConfigureVisuals(string key, string path, int frameCount, int frameWidth, int frameHeight,
+        float framesPerSecond, float pixelsPerUnit)
     {
-        visualPath = path;
-        visualFrameCount = frameCount;
-        visualFrameWidth = frameWidth;
-        visualFrameHeight = frameHeight;
-        visualPpu = ppu;
-        visualTimer = 0f;
+        visualClips[key] = new VisualClip
+        {
+            path = path,
+            frameCount = Mathf.Max(1, frameCount),
+            frameWidth = frameWidth,
+            frameHeight = frameHeight,
+            framesPerSecond = Mathf.Max(1f, framesPerSecond),
+            pixelsPerUnit = pixelsPerUnit
+        };
         visualRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    public void ConfigureVisuals(string path, int frameCount, int frameWidth, int frameHeight,
+        float framesPerSecond, float pixelsPerUnit)
+    {
+        ConfigureVisuals("Idle", path, frameCount, frameWidth, frameHeight, framesPerSecond, pixelsPerUnit);
     }
 
     protected override void Awake()
@@ -44,7 +62,6 @@ public class Enemy : Entity
     {
         base.Update();
         if (dead) return;
-        UpdateVisual();
         if (player == null) player = FindObjectOfType<Player>();
         if (stunTimer > 0f)
         {
@@ -79,14 +96,40 @@ public class Enemy : Entity
         }
     }
 
+    private void LateUpdate()
+    {
+        UpdateVisual();
+    }
+
     private void UpdateVisual()
     {
-        if (visualRenderer == null || visualFrameCount < 2) return;
-        visualTimer -= Time.deltaTime;
-        if (visualTimer > 0f) return;
-        visualTimer += 0.12f;
-        visualFrame = (visualFrame + 1) % visualFrameCount;
-        visualRenderer.sprite = RuntimeSprite.StripFrame(visualPath, visualFrame, visualFrameWidth, visualFrameHeight, visualPpu);
+        string key = VisualKeyForState();
+        VisualClip clip;
+        if (visualRenderer == null || !visualClips.TryGetValue(key, out clip)) return;
+        if (key != visualKey)
+        {
+            visualKey = key;
+            visualFrame = 0;
+            visualTimer = 0f;
+            visualRenderer.sprite = RuntimeSprite.StripFrame(clip.path, 0, clip.frameWidth,
+                clip.frameHeight, clip.pixelsPerUnit);
+        }
+
+        visualTimer += Time.deltaTime;
+        if (visualTimer < 1f / clip.framesPerSecond) return;
+        visualTimer -= 1f / clip.framesPerSecond;
+        visualFrame = (visualFrame + 1) % clip.frameCount;
+        visualRenderer.sprite = RuntimeSprite.StripFrame(clip.path, visualFrame, clip.frameWidth,
+            clip.frameHeight, clip.pixelsPerUnit);
+    }
+
+    private string VisualKeyForState()
+    {
+        if (dead) return "Dead";
+        if (StateLabel == "Stunned") return "Stunned";
+        if (StateLabel == "Attack") return "Attack";
+        if (StateLabel == "Chase" || StateLabel == "Patrol") return "Move";
+        return "Idle";
     }
 
     private void DealAttack()

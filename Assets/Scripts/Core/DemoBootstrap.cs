@@ -58,12 +58,16 @@ public class DemoBootstrap : MonoBehaviour
 
     private void CreateEnemy(Vector2 position)
     {
-        GameObject go = CreateActor("Enemy", position, Color.white, 0.95f, 1.3f,
-            RuntimeSprite.StripFrame("Chapter62Art/course_skeleton_idle", 0, 33, 32, 64f));
+        GameObject go = CreateActor("Enemy", position, Color.white, 1.4f, 1.75f,
+            RuntimeSprite.StripFrame("Chapter62Art/course_skeleton_idle", 0, 24, 32, 64f));
         go.layer = 10;
         Enemy enemy = go.AddComponent<Enemy>();
-        enemy.ConfigureVisuals("Chapter62Art/course_skeleton_idle", 8, 33, 32, 6, 64f);
-        go.GetComponent<BoxCollider2D>().size = new Vector2(0.54f / 0.95f, 1.08f / 1.3f);
+        enemy.ConfigureVisuals("Idle", "Chapter62Art/course_skeleton_idle", 11, 24, 32, 8f, 64f);
+        enemy.ConfigureVisuals("Move", "Chapter62Art/course_skeleton_walk", 13, 22, 33, 10f, 64f);
+        enemy.ConfigureVisuals("Attack", "Chapter62Art/course_skeleton_attack", 18, 43, 37, 18f, 64f);
+        enemy.ConfigureVisuals("Stunned", "Chapter62Art/course_skeleton_hit", 8, 30, 32, 12f, 64f);
+        enemy.ConfigureVisuals("Dead", "Chapter62Art/course_skeleton_dead", 15, 33, 32, 16f, 64f);
+        go.GetComponent<BoxCollider2D>().size = new Vector2(0.52f / 1.4f, 0.95f / 1.75f);
     }
 
     private void CreatePlatform(Vector2 position, Vector2 size, string spritePath, float pixelsPerUnit)

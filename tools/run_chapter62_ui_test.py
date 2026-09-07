@@ -109,7 +109,11 @@ def counter_scenario():
     capture(window, "counter_02_result")
     result = Image.open(EVIDENCE / "counter_02_result.png")
     enemy_area = result.crop((700, 950, 2560, 1150)).resize((3720, 400))
-    if "Stunned" not in pytesseract.image_to_string(enemy_area, config="--psm 6"):
+    ocr_text = "\n".join(
+        pytesseract.image_to_string(enemy_area, config=config)
+        for config in ("--psm 6", "--psm 11")
+    )
+    if "Stunned" not in ocr_text:
         raise AssertionError("counter result did not show Stunned in the enemy HUD")
 
 

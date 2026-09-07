@@ -11,8 +11,27 @@ public class Enemy : Entity
     private float stunTimer;
     private float attackTimer;
     private bool attacking;
+    private string visualPath;
+    private int visualFrameWidth;
+    private int visualFrameHeight;
+    private int visualFrameCount;
+    private float visualPpu;
+    private float visualTimer;
+    private int visualFrame;
+    private SpriteRenderer visualRenderer;
 
     public string StateLabel { get; private set; }
+
+    public void ConfigureVisuals(string path, int frameCount, int frameWidth, int frameHeight, float framesPerSecond, float ppu)
+    {
+        visualPath = path;
+        visualFrameCount = frameCount;
+        visualFrameWidth = frameWidth;
+        visualFrameHeight = frameHeight;
+        visualPpu = ppu;
+        visualTimer = 0f;
+        visualRenderer = GetComponent<SpriteRenderer>();
+    }
 
     protected override void Awake()
     {
@@ -25,6 +44,7 @@ public class Enemy : Entity
     {
         base.Update();
         if (dead) return;
+        UpdateVisual();
         if (player == null) player = FindObjectOfType<Player>();
         if (stunTimer > 0f)
         {
@@ -57,6 +77,16 @@ public class Enemy : Entity
             Face(dir);
             SetVelocity(dir * moveSpeed * 0.28f, rb == null ? 0f : rb.velocity.y);
         }
+    }
+
+    private void UpdateVisual()
+    {
+        if (visualRenderer == null || visualFrameCount < 2) return;
+        visualTimer -= Time.deltaTime;
+        if (visualTimer > 0f) return;
+        visualTimer += 0.12f;
+        visualFrame = (visualFrame + 1) % visualFrameCount;
+        visualRenderer.sprite = RuntimeSprite.StripFrame(visualPath, visualFrame, visualFrameWidth, visualFrameHeight, visualPpu);
     }
 
     private void DealAttack()

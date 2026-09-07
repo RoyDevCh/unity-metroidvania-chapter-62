@@ -7,19 +7,21 @@ public class DemoBootstrap : MonoBehaviour
         Physics2D.IgnoreLayerCollision(9, 10, true);
         Camera camera = FindObjectOfType<Camera>();
         if (camera != null) camera.backgroundColor = new Color(0.035f, 0.045f, 0.09f);
-        CreateBackground("Chapter62Art/background_layer_1_sky", 8, 0.98f);
-        CreateBackground("Chapter62Art/background_layer_2_ruins", 7, 0.98f);
-        CreateBackground("Chapter62Art/background_layer_3_foreground", 6, 0.98f);
+        CreateBackground("Chapter62Art/course_background_layer_1", -30, 2f, new Vector3(0f, 1.5f, 5f));
+        CreateBackground("Chapter62Art/course_background_layer_2", -20, 2f, new Vector3(0f, 0.65f, 4f));
+        CreateBackground("Chapter62Art/course_background_layer_3", -10, 2f, new Vector3(0f, -2.05f, 3f));
         CreatePlayer(new Vector2(-8f, -1.4f));
-        CreateEnemy(new Vector2(1.5f, -1.4f), "Chapter62Art/enemy_skeleton_sheet_40x32");
-        CreateEnemy(new Vector2(8f, -1.4f), "Chapter62Art/enemy_slime_sheet_40x32");
-        CreatePlatform(new Vector2(0f, -3f), new Vector2(26f, 1f), new Color(0.18f, 0.22f, 0.34f));
-        CreatePlatform(new Vector2(-5f, 0f), new Vector2(4f, 0.55f), new Color(0.26f, 0.3f, 0.45f));
-        CreatePlatform(new Vector2(4f, 1.1f), new Vector2(4f, 0.55f), new Color(0.26f, 0.3f, 0.45f));
+        CreateEnemy(new Vector2(1.5f, -1.4f));
+        CreateEnemy(new Vector2(8f, -1.4f));
+        CreatePlatform(new Vector2(0f, -3f), new Vector2(26f, 1f), "Chapter62Art/course_floor_tile_1", 32f);
+        CreatePlatform(new Vector2(-5f, 0f), new Vector2(4f, 0.55f), "Chapter62Art/course_platform_1", 32f);
+        CreatePlatform(new Vector2(4f, 1.1f), new Vector2(4f, 0.55f), "Chapter62Art/course_platform_1", 32f);
         // 靠近出生点的练习墙，方便直接验证滑墙和蹬墙跳。
-        CreatePlatform(new Vector2(-9.0f, 0.5f), new Vector2(0.6f, 7f), new Color(0.2f, 0.25f, 0.38f));
-        CreatePlatform(new Vector2(-12.5f, 1f), new Vector2(0.7f, 8f), new Color(0.2f, 0.25f, 0.38f));
-        CreatePlatform(new Vector2(12.5f, 1f), new Vector2(0.7f, 8f), new Color(0.2f, 0.25f, 0.38f));
+        CreatePlatform(new Vector2(-9.0f, 0.5f), new Vector2(0.6f, 7f), "Chapter62Art/course_brick_1", 32f);
+        CreatePlatform(new Vector2(-12.5f, 1f), new Vector2(0.7f, 8f), "Chapter62Art/course_brick_1", 32f);
+        CreatePlatform(new Vector2(12.5f, 1f), new Vector2(0.7f, 8f), "Chapter62Art/course_brick_1", 32f);
+        CreateDecor("Chapter62Art/course_candelabrum_1", new Vector2(-5.7f, -1.35f), 1.6f, 24);
+        CreateDecor("Chapter62Art/course_candelabrum_1", new Vector2(5.7f, -1.35f), 1.6f, 24);
         if (FindObjectOfType<CombatHud>() == null) new GameObject("Combat HUD").AddComponent<CombatHud>();
     }
 
@@ -42,37 +44,60 @@ public class DemoBootstrap : MonoBehaviour
     {
         // The supplied pixel sheets are exported at 4x (192x128 per logical 48x32 frame).
         GameObject go = CreateActor("Player", position, Color.white, 0.9f, 1.5f,
-            RuntimeSprite.PixelActor("Chapter62Art/character_player_sheet_48x32x6x6", 192, 128, 0, 128f));
+            RuntimeSprite.Frame("Chapter62Art/course_warrior_sheet", 6, 17, 0, 64f));
         go.layer = 9;
         Player player = go.AddComponent<Player>();
         Transform ground = new GameObject("GroundCheck").transform; ground.SetParent(go.transform); ground.localPosition = new Vector3(0f, -0.78f, 0f);
         Transform wall = new GameObject("WallCheck").transform; wall.SetParent(go.transform); wall.localPosition = new Vector3(0.52f, 0f, 0f);
         Transform attack = new GameObject("AttackCheck").transform; attack.SetParent(go.transform); attack.localPosition = new Vector3(0.9f, 0f, 0f);
         player.ConfigureRuntimeReferences(ground, wall, attack);
+        go.GetComponent<BoxCollider2D>().size = new Vector2(0.52f / 0.9f, 1.18f / 1.5f);
+        CharacterVisualAnimator visual = go.AddComponent<CharacterVisualAnimator>();
+        visual.Configure("Chapter62Art/course_warrior_sheet", 6, 17, 44, 64f);
     }
 
-    private void CreateEnemy(Vector2 position, string spritePath)
+    private void CreateEnemy(Vector2 position)
     {
         GameObject go = CreateActor("Enemy", position, Color.white, 0.95f, 1.3f,
-            RuntimeSprite.PixelActor(spritePath, 160, 128, 0, 128f));
+            RuntimeSprite.StripFrame("Chapter62Art/course_skeleton_idle", 0, 33, 32, 64f));
         go.layer = 10;
-        go.AddComponent<Enemy>();
+        Enemy enemy = go.AddComponent<Enemy>();
+        enemy.ConfigureVisuals("Chapter62Art/course_skeleton_idle", 8, 33, 32, 6, 64f);
+        go.GetComponent<BoxCollider2D>().size = new Vector2(0.54f / 0.95f, 1.08f / 1.3f);
     }
 
-    private void CreatePlatform(Vector2 position, Vector2 size, Color color)
+    private void CreatePlatform(Vector2 position, Vector2 size, string spritePath, float pixelsPerUnit)
     {
-        GameObject go = CreateActor("Ground", position, color, size.x, size.y);
+        GameObject go = new GameObject("Ground");
+        go.transform.position = position;
+        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+        renderer.sprite = RuntimeSprite.Single(spritePath, pixelsPerUnit);
+        renderer.drawMode = SpriteDrawMode.Tiled;
+        renderer.size = size;
         go.layer = 8;
-        go.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+        Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Static;
+        BoxCollider2D collider = go.AddComponent<BoxCollider2D>();
+        collider.size = size;
     }
 
-    private void CreateBackground(string spritePath, int sortingOrder, float scale)
+    private void CreateBackground(string spritePath, int sortingOrder, float scale, Vector3 position)
     {
         GameObject go = new GameObject("Background_" + sortingOrder);
-        go.transform.position = new Vector3(0f, 1.5f, 5f + (8 - sortingOrder));
+        go.transform.position = position;
         go.transform.localScale = Vector3.one * scale;
         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
         renderer.sprite = RuntimeSprite.Background(spritePath);
-        renderer.sortingOrder = sortingOrder - 20;
+        renderer.sortingOrder = sortingOrder;
+    }
+
+    private void CreateDecor(string spritePath, Vector2 position, float scale, int sortingOrder)
+    {
+        GameObject go = new GameObject("Decor_Candelabrum");
+        go.transform.position = position;
+        go.transform.localScale = Vector3.one * scale;
+        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+        renderer.sprite = RuntimeSprite.Single(spritePath, 128f);
+        renderer.sortingOrder = sortingOrder;
     }
 }

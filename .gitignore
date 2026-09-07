@@ -22,3 +22,8 @@ unity-import.log
 *.log
 test-evidence/
 tools/__pycache__/
+
+# Superseded local art experiments; the runnable demo uses Chapter62Art/course_*.
+Assets/Resources/Chapter62Art/enhanced_*
+Assets/StarterAssets/art/generated/
+Assets/StarterAssets/art/generated.meta

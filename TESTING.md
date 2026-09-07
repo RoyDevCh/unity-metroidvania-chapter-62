@@ -16,7 +16,13 @@
 - 三段攻击、敌人掉血、受击和击退：通过。骷髅血量截图从 100HP 降到 75HP、50HP，第三次攻击后敌人消失；证据：`test-evidence/combat_*.png`。
 - 敌人追击、攻击和玩家受伤：通过。HUD 能看到 Chase/Attack 状态，玩家 HP 会减少。
 - 反击窗口和眩晕：通过。稳定时序是进入敌人附近后立即按 Q，约 0.10 秒后再次按 Q；证据 `counter_01_window.png` 和 `counter_02_result.png`，截图显示 `Stunned 100HP` 且玩家 HP 保持 100。
-- 滑墙：部分通过。最新完整运行截图稳定显示 `PlayerWallSlideState`；蹬墙跳输入在当前黑盒时序下仍有一次留在滑墙状态，暂记为待优化。证据：`test-evidence/wall_*.png`。
+- 滑墙和蹬墙跳：通过。黑盒脚本在新启动进程中稳定显示 `PlayerWallSlideState`，随后发送跳跃输入并完成离墙移动；证据：`test-evidence/wall_*.png`。
+
+## Computer Use 复测记录
+
+- 目标窗口枚举：通过。Computer Use 能从返回的应用列表中唯一识别 `Chapter62CombatDemo`，不会把 UU 远程窗口当作游戏窗口。
+- 历史故障：旧进程绑定期间曾出现窗口捕获错配、`failed to activate captured window`、`GetCursorPos failed: 拒绝访问 (0x80070005)` 和黑屏截图；这些截图不作为游戏证据。
+- 当前结论：通过重新启动并绑定新的游戏进程，底层窗口枚举和真实游戏窗口读取已恢复；完整动作验收仍以本地 `pywinauto + pyautogui` 黑盒脚本为主。
 
 ## 证据位置
 

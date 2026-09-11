@@ -35,10 +35,12 @@ public class Player : Entity
     public float AttackRadius { get { return attackRadius; } }
     public float AttackDamage { get { return attackDamage; } }
     public bool CounterWindow { get; private set; }
+    public bool CounterSucceeded { get; private set; }
     public string StateLabel { get { return StateMachine == null || StateMachine.CurrentState == null ? "None" : StateMachine.CurrentState.GetType().Name; } }
     private float dashCooldownTimer;
     private float comboTimer;
     private int comboStage;
+    private float counterResultTimer;
 
     protected override void Awake()
     {
@@ -62,6 +64,8 @@ public class Player : Entity
         dashCooldownTimer = Mathf.Max(0f, dashCooldownTimer - Time.deltaTime);
         comboTimer -= Time.deltaTime;
         if (comboTimer <= 0f) comboStage = 0;
+        if (counterResultTimer > 0f) counterResultTimer -= Time.deltaTime;
+        else CounterSucceeded = false;
         if (!IsDead) StateMachine.Update();
     }
 
@@ -95,6 +99,8 @@ public class Player : Entity
             if (enemy != null && enemy.CanBeStunned())
             {
                 enemy.Stun(1.25f);
+                CounterSucceeded = true;
+                counterResultTimer = 1.2f;
                 return true;
             }
         }

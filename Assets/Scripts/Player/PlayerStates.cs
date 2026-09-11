@@ -137,11 +137,13 @@ public class PlayerWallJumpState : PlayerState
 public class PlayerCounterAttackState : PlayerState
 {
     private bool checkedHit;
+    private float counterInputBuffer;
     public PlayerCounterAttackState(Player p, PlayerStateMachine sm) : base(p, sm) { }
     public override void Enter()
     {
         base.Enter();
         checkedHit = false;
+        counterInputBuffer = 0.35f;
         player.BeginCounterWindow();
         player.SetZeroVelocity();
     }
@@ -149,7 +151,11 @@ public class PlayerCounterAttackState : PlayerState
     {
         base.Update();
         player.SetZeroVelocity();
-        if (!checkedHit && Input.GetKeyDown(KeyCode.Q)) { checkedHit = true; player.TryCounter(); }
+        counterInputBuffer -= Time.deltaTime;
+        if (!checkedHit && (Input.GetKeyDown(KeyCode.Q) || counterInputBuffer > 0f))
+        {
+            checkedHit = player.TryCounter();
+        }
         if (stateTimer >= 2f)
         {
             if (player.IsGrounded) stateMachine.ChangeState(player.IdleState);

@@ -27,11 +27,17 @@ public class CombatHud : MonoBehaviour
         GUI.Label(new Rect(18, 52, 700, 28), "A/D 移动   Space 跳跃   Shift 冲刺   J 攻击   Q 进入弹反，再按 Q 触发招架", body);
         GUI.Label(new Rect(18, 82, 300, 28), "HP  " + Mathf.CeilToInt(player.Health) + " / " + Mathf.CeilToInt(player.MaxHealth), body);
         GUI.Label(new Rect(18, 110, 500, 28), "Player State: " + player.StateLabel, body);
+        if (player.WasDamagedRecently)
+            GUI.Label(new Rect(18, 138, 500, 28), "Player Hit: Yes", body);
+        if (player.CounterSucceeded)
+            GUI.Label(new Rect(18, 166, 500, 28), "Counter Result: Stunned", body);
         Enemy[] enemies = FindObjectsOfType<Enemy>();
         for (int i = 0; i < enemies.Length; i++)
         {
             Vector3 screen = Camera.main.WorldToScreenPoint(enemies[i].transform.position + Vector3.up * 1.1f);
-            GUI.Label(new Rect(screen.x - 35f, Screen.height - screen.y, 160, 24), enemies[i].StateLabel + "  " + Mathf.CeilToInt(enemies[i].Health) + "HP", body);
+            string contact = enemies[i].AttackConnectedRecently ? "  HIT" : "";
+            string touching = enemies[i].PlayerTouching ? "  Contact: Yes" : "";
+            GUI.Label(new Rect(screen.x - 35f, Screen.height - screen.y, 260, 24), enemies[i].StateLabel + contact + touching + "  " + Mathf.CeilToInt(enemies[i].Health) + "HP", body);
         }
     }
 }

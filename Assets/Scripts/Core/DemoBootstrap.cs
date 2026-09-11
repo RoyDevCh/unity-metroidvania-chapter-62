@@ -4,7 +4,9 @@ public class DemoBootstrap : MonoBehaviour
 {
     private void Awake()
     {
-        Physics2D.IgnoreLayerCollision(9, 10, true);
+        // Player and enemies must physically meet so attack contact is visible
+        // and can be verified independently from the damage calculation.
+        Physics2D.IgnoreLayerCollision(9, 10, false);
         Camera camera = FindObjectOfType<Camera>();
         if (camera != null) camera.backgroundColor = new Color(0.035f, 0.045f, 0.09f);
         CreateBackground("Chapter62Art/course_background_layer_1", -30, 2f, new Vector3(0f, 1.5f, 5f));

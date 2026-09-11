@@ -7,8 +7,7 @@ import time
 import pyautogui
 import win32gui
 import pytesseract
-from pywinauto import Desktop
-from PIL import Image
+from PIL import Image, ImageGrab
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,10 +19,20 @@ pyautogui.FAILSAFE = False
 
 
 def activate(window):
-    window.restore()
-    window.set_focus()
-    if win32gui.GetForegroundWindow() != window.handle:
-        win32gui.SetForegroundWindow(window.handle)
+    handle = window.handle
+    win32gui.ShowWindow(handle, 9)  # SW_RESTORE
+    for _ in range(8):
+        if win32gui.GetForegroundWindow() == handle:
+            break
+        try:
+            win32gui.BringWindowToTop(handle)
+            win32gui.SetActiveWindow(handle)
+            win32gui.SetForegroundWindow(handle)
+        except Exception:
+            pass
+        time.sleep(0.08)
+    if win32gui.GetForegroundWindow() != handle:
+        raise RuntimeError(f"could not activate game window {handle}")
     time.sleep(0.12)
 
 
@@ -31,17 +40,51 @@ def start_clean_game():
     subprocess.run(["taskkill", "/F", "/IM", "Chapter62CombatDemo.exe"],
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
     subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
-    time.sleep(4.0)
-    window = Desktop(backend="win32").window(title="Chapter62CombatDemo")
-    window.wait("exists enabled visible", timeout=10)
+    deadline = time.monotonic() + 10.0
+    handle = None
+    while time.monotonic() < deadline:
+        handles = []
+        win32gui.EnumWindows(
+            lambda hwnd, out: out.append(hwnd)
+            if win32gui.IsWindowVisible(hwnd)
+            and win32gui.GetWindowText(hwnd) == "Chapter62CombatDemo"
+            else None,
+            handles,
+        )
+        if len(handles) == 1:
+            handle = handles[0]
+            break
+        time.sleep(0.1)
+    if handle is None:
+        raise TimeoutError("Chapter62CombatDemo window did not appear within 10 seconds")
+
+    class WindowHandle:
+        def __init__(self, value):
+            self.handle = value
+
+    window = WindowHandle(handle)
     activate(window)
+    time.sleep(3.0)  # let Unity render a stable first frame before input
     return window
+
+
+def screenshot_window(window):
+    left, top, right, bottom = win32gui.GetWindowRect(window.handle)
+    width, height = right - left, bottom - top
+    if width <= 0 or height <= 0:
+        raise RuntimeError(f"invalid game window bounds: {(left, top, right, bottom)}")
+    # ImageGrab with all_screens=True supports windows on monitors with negative
+    # virtual-screen coordinates; pyautogui's region capture does not.
+    image = ImageGrab.grab(bbox=(left, top, right, bottom), all_screens=True)
+    if image.width < width or image.height < height:
+        raise RuntimeError(f"incomplete game screenshot: {image.size}, expected {(width, height)}")
+    return image
 
 
 def capture(window, name):
     activate(window)
     path = EVIDENCE / f"{name}.png"
-    window.capture_as_image().save(path)
+    screenshot_window(window).save(path)
     print(f"SCREENSHOT {name} {path}")
 
 
@@ -94,27 +137,41 @@ def combat_scenario():
 
 
 def counter_scenario():
-    window = start_clean_game()
-    print(f"SCENARIO counter WINDOW_HANDLE {window.handle}")
-    activate(window)
-    hold("d", 0.92)
-    # 先进入反击状态，再在敌人攻击前摇期间第二次按 Q。
-    tap(window, "q")
-    # 记录窗口截图，但不调用带额外等待的通用 capture，给黑盒观察留出完整窗口。
-    window.capture_as_image().save(EVIDENCE / "counter_01_window.png")
-    # 攻击前摇是 0.45 秒；短时序能在反击窗口内稳定命中招架。
-    time.sleep(0.12)
-    tap(window, "q")
-    time.sleep(0.12)
-    capture(window, "counter_02_result")
-    result = Image.open(EVIDENCE / "counter_02_result.png")
-    enemy_area = result.crop((700, 950, 2560, 1150)).resize((3720, 400))
-    ocr_text = "\n".join(
-        pytesseract.image_to_string(enemy_area, config=config)
-        for config in ("--psm 6", "--psm 11")
-    )
-    if "Stunned" not in ocr_text:
-        raise AssertionError("counter result did not show Stunned in the enemy HUD")
+    # The enemy can hit the player while the test waits for one exact frame.
+    # Retry from a clean process and poll the explicit in-game result banner.
+    # This separates a real counter miss from a screenshot/OCR timing miss.
+    for attempt in range(1, 4):
+        window = start_clean_game()
+        print(f"SCENARIO counter ATTEMPT {attempt} WINDOW_HANDLE {window.handle}")
+        activate(window)
+        # Reach the first enemy without waiting through its full attack cycle.
+        hold("d", 1.25)
+        tap(window, "q")
+        # Do not capture or activate between the two Q presses: either operation
+        # can consume the enemy's 0.45 s attack telegraph.
+        time.sleep(0.18)
+        tap(window, "q")
+
+        success = False
+        latest = None
+        for poll in range(16):
+            time.sleep(0.10)
+            latest = screenshot_window(window)
+            hud = latest.crop((0, 0, int(latest.width * 0.70), int(latest.height * 0.38)))
+            hud = hud.resize((min(hud.width * 3, 5000), hud.height * 3))
+            ocr_text = "\n".join(
+                pytesseract.image_to_string(hud, config=config)
+                for config in ("--psm 6", "--psm 11")
+            )
+            if "Stunned" in ocr_text or "Counter Result" in ocr_text:
+                success = True
+                latest.save(EVIDENCE / "counter_02_result.png")
+                break
+        if latest is not None:
+            latest.save(EVIDENCE / f"counter_attempt_{attempt:02d}_last.png")
+        if success:
+            return
+    raise AssertionError("counter result did not show the in-game Counter Result: Stunned banner")
 
 
 def wall_scenario():

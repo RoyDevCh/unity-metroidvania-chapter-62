@@ -4,14 +4,21 @@ using System.Collections.Generic;
 public class Enemy : Entity
 {
     [SerializeField] private float detectionRange = 7f;
-    [SerializeField] private float attackRange = 1.45f;
+    [SerializeField] private float attackRange = 0.85f;
     [SerializeField] private float attackDamage = 12f;
+    [SerializeField] private float attackWindup = 0.45f;
+    [SerializeField] private float attackRecovery = 0.30f;
+    [SerializeField] private float attackReach = 1.00f;
     [SerializeField] private float patrolDistance = 3f;
     private Player player;
     private Vector3 startPosition;
     private float stunTimer;
     private float attackTimer;
     private bool attacking;
+    private bool attackHit;
+    private float attackPhaseTimer;
+    private float attackContactTimer;
+    private bool playerTouching;
     private class VisualClip
     {
         public string path;
@@ -63,6 +70,9 @@ public class Enemy : Entity
         base.Update();
         if (dead) return;
         if (player == null) player = FindObjectOfType<Player>();
+        Collider2D ownCollider = GetComponent<Collider2D>();
+        Collider2D playerCollider = player == null ? null : player.GetComponent<Collider2D>();
+        playerTouching = ownCollider != null && playerCollider != null && ownCollider.IsTouching(playerCollider);
         if (stunTimer > 0f)
         {
             stunTimer -= Time.deltaTime;
@@ -70,14 +80,36 @@ public class Enemy : Entity
             SetZeroVelocity();
             return;
         }
+        if (attackContactTimer > 0f) attackContactTimer -= Time.deltaTime;
+        if (attacking)
+        {
+            StateLabel = attackHit ? "Attack Hit" : "Attack";
+            SetZeroVelocity();
+            if (player != null)
+                Face(player.transform.position.x >= transform.position.x ? 1 : -1);
+            attackPhaseTimer -= Time.deltaTime;
+            if (!attackHit && attackPhaseTimer <= 0f)
+                DealAttack();
+            if (attackHit && attackPhaseTimer <= -attackRecovery)
+            {
+                attacking = false;
+                attackTimer = 1.1f;
+            }
+            return;
+        }
         if (attackTimer > 0f) attackTimer -= Time.deltaTime;
         float distance = player == null ? 999f : Vector2.Distance(transform.position, player.transform.position);
         if (distance <= attackRange && player != null)
         {
-            StateLabel = attacking ? "Attack" : "Battle";
+            StateLabel = "Battle";
             SetZeroVelocity();
             Face(player.transform.position.x >= transform.position.x ? 1 : -1);
-            if (attackTimer <= 0f) { attacking = true; attackTimer = 1.1f; Invoke(nameof(DealAttack), 0.45f); }
+            if (attackTimer <= 0f)
+            {
+                attacking = true;
+                attackHit = false;
+                attackPhaseTimer = attackWindup;
+            }
         }
         else if (distance <= detectionRange && player != null)
         {
@@ -134,10 +166,20 @@ public class Enemy : Entity
 
     private void DealAttack()
     {
-        attacking = false;
-        if (dead || player == null || Vector2.Distance(transform.position, player.transform.position) > attackRange + 0.35f) return;
-        if (player.CounterWindow) return;
-        player.Damage(attackDamage, new Vector2(facingDirection * 5f, 3f));
+        attackHit = true;
+        attackContactTimer = 0.85f;
+        if (dead || player == null || player.CounterWindow) return;
+        Vector2 attackCenter = (Vector2)transform.position + Vector2.right * facingDirection * attackReach * 0.5f;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(attackCenter, attackReach * 0.5f);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Player hitPlayer = hits[i].GetComponentInParent<Player>();
+            if (hitPlayer != null)
+            {
+                hitPlayer.Damage(attackDamage, new Vector2(facingDirection * 5f, 3f));
+                return;
+            }
+        }
     }
 
     public bool CanBeStunned()
@@ -149,5 +191,8 @@ public class Enemy : Entity
         bool counterWindowTarget = player.CounterWindow && distance <= attackRange + 1f;
         return attackIsActive || attackIsAboutToStart || counterWindowTarget;
     }
-    public void Stun(float duration) { stunTimer = Mathf.Max(stunTimer, duration); attacking = false; CancelInvoke(nameof(DealAttack)); SetZeroVelocity(); }
+    public void Stun(float duration) { stunTimer = Mathf.Max(stunTimer, duration); attacking = false; attackHit = false; attackPhaseTimer = 0f; SetZeroVelocity(); }
+
+    public bool AttackConnectedRecently { get { return attackContactTimer > 0f; } }
+    public bool PlayerTouching { get { return playerTouching; } }
 }

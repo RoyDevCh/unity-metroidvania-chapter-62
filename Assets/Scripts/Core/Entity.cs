@@ -13,6 +13,7 @@ public abstract class Entity : MonoBehaviour
     protected float health;
     protected float knockbackTimer;
     protected float flashTimer;
+    protected float damageFeedbackTimer;
     protected int facingDirection = 1;
     protected bool dead;
 
@@ -21,6 +22,7 @@ public abstract class Entity : MonoBehaviour
     public float MoveSpeed { get { return moveSpeed; } }
     public bool IsDead { get { return dead; } }
     public int FacingDirection { get { return facingDirection; } }
+    public bool WasDamagedRecently { get { return damageFeedbackTimer > 0f; } }
 
     protected virtual void Awake()
     {
@@ -34,6 +36,8 @@ public abstract class Entity : MonoBehaviour
     {
         if (knockbackTimer > 0f)
             knockbackTimer -= Time.deltaTime;
+        if (damageFeedbackTimer > 0f)
+            damageFeedbackTimer -= Time.deltaTime;
 
         if (flashTimer > 0f)
         {
@@ -54,6 +58,7 @@ public abstract class Entity : MonoBehaviour
         if (dead) return;
         health = Mathf.Max(0f, health - amount);
         flashTimer = 0.12f;
+        damageFeedbackTimer = 0.85f;
         if (rb != null)
             rb.velocity = new Vector2(knockback.x, knockback.y);
         knockbackTimer = knockbackDuration;
